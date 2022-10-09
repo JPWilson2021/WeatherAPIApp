@@ -1,4 +1,4 @@
-package com.jwilson.weatherapi;
+package com.jwilson.weatherapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 

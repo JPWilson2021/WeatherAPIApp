@@ -1,4 +1,4 @@
-package com.jwilson.weatherapi;
+package com.jwilson.weatherapp;
 
 import org.junit.Test;
 
