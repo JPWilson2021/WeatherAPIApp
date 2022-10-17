@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 public class WeatherRVAdapter extends RecyclerView.Adapter<WeatherRVAdapter.ViewHolder>{
@@ -30,6 +32,11 @@ public class WeatherRVAdapter extends RecyclerView.Adapter<WeatherRVAdapter.View
     @Override
     public void onBindViewHolder(@NonNull WeatherRVAdapter.ViewHolder holder, int position) {
 
+        WeatherRVModal modal = weatherRVModalArrayList.get(position);
+        holder.temperatureTV.setText(modal.getTemperature() + "°c");
+        Picasso.get().load("http:".concat(modal.getIcon())).into(holder.conditionIV);
+        holder.windTV.setText(modal.getWindSpeed() + "Km/h");
+
     }
 
     @Override
@@ -40,8 +47,13 @@ public class WeatherRVAdapter extends RecyclerView.Adapter<WeatherRVAdapter.View
     public class ViewHolder extends RecyclerView.ViewHolder{
         private TextView windTV, temperatureTV, timeTV;
         private ImageView conditionIV;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            windTV = itemView.findViewById(R.id.idTVWindSpeed);
+            temperatureTV = itemView.findViewById(R.id.idTVTemperature);
+            timeTV = itemView.findViewById(R.id.idTVTime);
+            conditionIV = itemView.findViewById(R.id.idTVCondition);
         }
     }
 }
