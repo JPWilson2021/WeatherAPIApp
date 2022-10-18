@@ -22,7 +22,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.textfield.TextInputEditText;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -123,7 +135,60 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getWeatherInfo(String cityName){
-        String url = "http://api.weatherapi.com/v1/forecast.json?key=242e2324765f427aba4194901221610 &q="+ cityName + "&days=1&aqi=yes&alerts=yes";
+        String url = "http://api.weatherapi.com/v1/forecast.json?key=983dae2f9717419c901180314221810 &q="+ cityName + "&days=1&aqi=yes&alerts=yes";
+        cityNameTV.setText(cityName);
+        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                loadingPB.setVisibility(View.GONE);
+                homeRL.setVisibility(View.VISIBLE);
+                weatherRVModalArrayList.clear();
+
+                try {
+                    String temperature = response.getJSONObject("current").getString("temp_f");
+                    temperatureTV.setText(temperature+"°f");
+                    int isDay = response.getJSONObject("current").getInt("is_day");
+                    String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
+                    String conditionIcon = response.getJSONObject("current").getJSONObject("condition").getString("icon");
+                    Picasso.get().load("http:".concat(conditionIcon)).into(iconIV);
+                    conditionTV.setText(condition);
+                    if(isDay==1){
+                        Picasso.get().load("https://images.unsplash.com/photo-1563630381190-77c336ea545a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8c3VufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60").into(backIV);
+                    }else{
+                        Picasso.get().load("https://images.unsplash.com/photo-1502318217862-aa4e294ba657?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OTZ8fG5pZ2h0JTIwc2t5fGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60").into(backIV);
+                    }
+
+                    JSONObject forecastObj = response.getJSONObject("forecast");
+                    JSONObject forecast0 = forecastObj.getJSONArray("forecastday").getJSONObject(0);
+                    JSONArray hourArray = forecast0.getJSONArray("hour");
+
+                    for(int i=0; i<hourArray.length(); i++){
+                        JSONObject hourObj = hourArray.getJSONObject(i);
+                        String time = hourObj.getString("time");
+                        String temp = hourObj.getString("temp_f");
+                        String img = hourObj.getJSONObject("condition").getString("icon");
+                        String wind = hourObj.getString("wind_kph");
+                        weatherRVModalArrayList.add(new WeatherRVModal(time,temp,img,wind));
+                    }
+                    weatherRVAdapter.notifyDataSetChanged();
+
+
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this,"Please enter valid city name..",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        requestQueue.add(jsonObjectRequest);
     }
 
 }
